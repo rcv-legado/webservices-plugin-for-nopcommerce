@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Nop.Plugin.Misc.WebServices")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Nop Solutions")]
+[assembly: AssemblyCompany("Nop Solutions, Ltd")]
 [assembly: AssemblyProduct("Nop.Plugin.Misc.WebServices")]
-[assembly: AssemblyCopyright("Copyright © Nop Solutions 2011")]
+[assembly: AssemblyCopyright("Copyright © Nop Solutions, Ltd")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

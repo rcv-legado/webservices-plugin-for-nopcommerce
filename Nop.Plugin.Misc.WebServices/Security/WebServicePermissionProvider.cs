@@ -7,8 +7,14 @@ namespace Nop.Plugin.Misc.WebServices.Security
 {
     public partial class WebServicePermissionProvider : IPermissionProvider
     {
+        #region Static
+
         public static readonly PermissionRecord AccessWebService = new PermissionRecord { Name = "Plugins. Access Web Service", SystemName = "AccessWebService", Category = "Plugin" };
-        
+
+        #endregion
+
+        #region Methods
+
         public virtual IEnumerable<PermissionRecord> GetPermissions()
         {
             return new[] 
@@ -34,5 +40,7 @@ namespace Nop.Plugin.Misc.WebServices.Security
             //    },
             //};
         }
+
+        #endregion
     }
 }

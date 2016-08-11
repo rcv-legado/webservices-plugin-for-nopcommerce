@@ -26,6 +26,9 @@ namespace Nop.Plugin.Misc.WebServices
 
         #region Methods
 
+        /// <summary>
+        /// Install plugin
+        /// </summary>
         public override void Install()
         {
             //install new permissions
@@ -40,6 +43,9 @@ namespace Nop.Plugin.Misc.WebServices
             base.Install();
         }
 
+        /// <summary>
+        /// Uninstall plugin
+        /// </summary>
         public override void Uninstall()
         {
             //uninstall permissions

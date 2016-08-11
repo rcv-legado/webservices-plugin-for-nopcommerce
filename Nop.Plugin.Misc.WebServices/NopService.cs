@@ -34,7 +34,6 @@ namespace Nop.Plugin.Misc.WebServices
         private readonly IStateProvinceService _stateProvinceService;
         private readonly ICustomerService _customerService;
         private readonly ICustomerRegistrationService _customerRegistrationService;
-        private readonly CustomerSettings _customerSettings;
         private readonly IPermissionService _permissionSettings;
         private readonly IOrderProcessingService _orderProcessingService;
         private readonly IOrderService _orderService;
@@ -42,8 +41,9 @@ namespace Nop.Plugin.Misc.WebServices
         private readonly IWorkContext _workContext;
         private readonly IPluginFinder _pluginFinder;
         private readonly IStoreContext _storeContext;
-        
-        #endregion 
+        private readonly CustomerSettings _customerSettings;
+
+        #endregion
 
         #region Ctor
 
@@ -54,7 +54,6 @@ namespace Nop.Plugin.Misc.WebServices
             _stateProvinceService = EngineContext.Current.Resolve<IStateProvinceService>();
             _customerService = EngineContext.Current.Resolve<ICustomerService>();
             _customerRegistrationService = EngineContext.Current.Resolve<ICustomerRegistrationService>();
-            _customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
             _permissionSettings = EngineContext.Current.Resolve<IPermissionService>();
             _orderProcessingService = EngineContext.Current.Resolve<IOrderProcessingService>();
             _orderService = EngineContext.Current.Resolve<IOrderService>();
@@ -62,6 +61,7 @@ namespace Nop.Plugin.Misc.WebServices
             _workContext = EngineContext.Current.Resolve<IWorkContext>();
             _pluginFinder = EngineContext.Current.Resolve<IPluginFinder>();
             _storeContext = EngineContext.Current.Resolve<IStoreContext>();
+            _customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
         }
 
         #endregion 
@@ -72,8 +72,10 @@ namespace Nop.Plugin.Misc.WebServices
         {
             //check whether web service plugin is installed
             var pluginDescriptor = _pluginFinder.GetPluginDescriptorBySystemName("Misc.WebServices");
+
             if (pluginDescriptor == null)
                 throw new ApplicationException("Web services plugin cannot be loaded");
+
             if (!_pluginFinder.AuthenticateStore(pluginDescriptor, _storeContext.CurrentStore.Id))
                 throw new ApplicationException("Web services plugin is not available in this store");
 
@@ -93,10 +95,12 @@ namespace Nop.Plugin.Misc.WebServices
         protected List<Order> GetOrderCollection(int[] ordersId)
         {
             var orders = new List<Order>();
+
             foreach (int id in ordersId)
             {
                 orders.Add(_orderService.GetOrderById(id));
             }
+
             return orders;
         }
 
@@ -107,6 +111,7 @@ namespace Nop.Plugin.Misc.WebServices
         public DataSet GetPaymentMethod(string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
@@ -115,12 +120,15 @@ namespace Nop.Plugin.Misc.WebServices
 
             var dataset = new DataSet();
             var datatable = dataset.Tables.Add("PaymentMethod");
+
             datatable.Columns.Add("SystemName");
             datatable.Columns.Add("Name");
+
             foreach (var plugin in plugins)
             {
                 datatable.LoadDataRow(new object[] { plugin.PluginDescriptor.SystemName, plugin.PluginDescriptor.FriendlyName }, true);
             }
+
             return dataset;
         }
 
@@ -150,9 +158,6 @@ namespace Nop.Plugin.Misc.WebServices
 
             //return dataset;
 
-
-
-
             return null;
         }
         
@@ -160,23 +165,22 @@ namespace Nop.Plugin.Misc.WebServices
         {
             //uncomment lines below in order to allow execute any SQL
             //CheckAccess(usernameOrEmail, userPassword);
+
             //if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
             //    throw new ApplicationException("Not allowed to manage orders");
 
             //Object result;
             //var dataSettingsManager = new DataSettingsManager();
             //var dataProviderSettings = dataSettingsManager.LoadSettings();
+
             //using (SqlConnection connection = new SqlConnection(dataProviderSettings.DataConnectionString))
             //{
             //    SqlCommand cmd = new SqlCommand(sqlStatement, connection);
             //    connection.Open();
             //    result = cmd.ExecuteScalar();
-
             //}
 
             //return result;
-
-
 
             return null;
         }
@@ -185,11 +189,13 @@ namespace Nop.Plugin.Misc.WebServices
         {
             //uncomment lines below in order to allow execute any SQL
             //CheckAccess(usernameOrEmail, userPassword);
+
             //if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
             //    throw new ApplicationException("Not allowed to manage orders");
 
             //var dataSettingsManager = new DataSettingsManager();
             //var dataProviderSettings = dataSettingsManager.LoadSettings();
+
             //using (SqlConnection connection = new SqlConnection(dataProviderSettings.DataConnectionString))
             //{
             //    SqlCommand cmd = new SqlCommand(sqlStatement, connection);
@@ -201,10 +207,12 @@ namespace Nop.Plugin.Misc.WebServices
         public List<OrderError> DeleteOrders(int[] ordersId, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
             var errors = new List<OrderError>();
+
             foreach (var order in GetOrderCollection(ordersId))
             {
                 try
@@ -216,24 +224,28 @@ namespace Nop.Plugin.Misc.WebServices
                     throw new ApplicationException(ex.Message);
                 }
             }
+
             return errors;
         }
 
         public void AddOrderNote(int orderId, string note, bool displayToCustomer, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
             try
             {
                 var order = _orderService.GetOrderById(orderId);
+
                 order.OrderNotes.Add(new OrderNote
                 {
                     Note = note,
                     DisplayToCustomer = displayToCustomer,
                     CreatedOnUtc = DateTime.UtcNow
                 });
+
                 _orderService.UpdateOrder(order);
             }
             catch (Exception ex)
@@ -246,6 +258,7 @@ namespace Nop.Plugin.Misc.WebServices
             string city, string stateProvinceAbbreviation, string countryThreeLetterIsoCode, string postalCode, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
@@ -263,12 +276,16 @@ namespace Nop.Plugin.Misc.WebServices
                 a.Address2 = address2;
                 a.City = city;
                 StateProvince stateProvince = null;
+
                 if (!String.IsNullOrEmpty(stateProvinceAbbreviation))
                     stateProvince = _stateProvinceService.GetStateProvinceByAbbreviation(stateProvinceAbbreviation);
+
                 a.StateProvince = stateProvince;
                 Country country = null;
+
                 if (!String.IsNullOrEmpty(countryThreeLetterIsoCode))
                     country = _countryService.GetCountryByThreeLetterIsoCode(countryThreeLetterIsoCode);
+
                 a.Country = country;
                 a.ZipPostalCode = postalCode;
 
@@ -284,6 +301,7 @@ namespace Nop.Plugin.Misc.WebServices
             string city, string stateProvinceAbbreviation, string countryThreeLetterIsoCode, string postalCode, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
@@ -301,12 +319,16 @@ namespace Nop.Plugin.Misc.WebServices
                 a.Address2 = address2;
                 a.City = city;
                 StateProvince stateProvince = null;
+
                 if (!String.IsNullOrEmpty(stateProvinceAbbreviation))
                     stateProvince = _stateProvinceService.GetStateProvinceByAbbreviation(stateProvinceAbbreviation);
+
                 a.StateProvince = stateProvince;
                 Country country = null;
+
                 if (!String.IsNullOrEmpty(countryThreeLetterIsoCode))
                     country = _countryService.GetCountryByThreeLetterIsoCode(countryThreeLetterIsoCode);
+
                 a.Country = country;
                 a.ZipPostalCode = postalCode;
 
@@ -316,12 +338,12 @@ namespace Nop.Plugin.Misc.WebServices
             {
                 throw new ApplicationException(ex.Message);
             }
-
         }
         
         public void SetOrderPaymentPending(int orderId, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
@@ -335,12 +357,12 @@ namespace Nop.Plugin.Misc.WebServices
             {
                 throw new ApplicationException(ex.Message);
             }
-
         }
         
         public void SetOrderPaymentPaid(int orderId, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
@@ -353,12 +375,12 @@ namespace Nop.Plugin.Misc.WebServices
             {
                 throw new ApplicationException(ex.Message);
             }
-
         }
         
         public void SetOrderPaymentPaidWithMethod(int orderId, string paymentMethodName, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
@@ -373,18 +395,19 @@ namespace Nop.Plugin.Misc.WebServices
             {
                 throw new ApplicationException(ex.Message);
             }
-
         }
         
         public void SetOrderPaymentRefund(int orderId, bool offline, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
             try
             {
                 var order = _orderService.GetOrderById(orderId);
+
                 if (offline)
                 {
                     _orderProcessingService.RefundOffline(order);
@@ -392,28 +415,28 @@ namespace Nop.Plugin.Misc.WebServices
                 else
                 {
                     var errors = _orderProcessingService.Refund(order);
+
                     if (errors.Count > 0)
                     {
                         throw new ApplicationException(errors[0]);
                     }
-
                 }
             }
             catch (Exception ex)
             {
                 throw new ApplicationException(ex.Message);
             }
-
         }
 
-        
         public List<OrderError> SetOrdersStatusCanceled(int[] ordersId, string usernameOrEmail, string userPassword)
         {
             CheckAccess(usernameOrEmail, userPassword);
+
             if (!_permissionSettings.Authorize(StandardPermissionProvider.ManageOrders))
                 throw new ApplicationException("Not allowed to manage orders");
 
             var errors = new List<OrderError>();
+
             foreach (var order in GetOrderCollection(ordersId))
             {
                 try
@@ -425,6 +448,7 @@ namespace Nop.Plugin.Misc.WebServices
                     throw new ApplicationException(ex.Message);
                 }
             }
+
             return errors;
         }
         

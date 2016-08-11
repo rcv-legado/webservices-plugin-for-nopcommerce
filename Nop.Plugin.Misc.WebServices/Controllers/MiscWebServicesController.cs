@@ -6,9 +6,13 @@ namespace Nop.Plugin.Misc.WebServices.Controllers
     [AdminAuthorize]
     public class MiscWebServicesController : BasePluginController
     {
+        #region Methods
+
         public ActionResult Configure()
         {
             return View("~/Plugins/Misc.WebServices/Views/MiscWebServices/Configure.cshtml");
         }
+
+        #endregion
     }
 }
